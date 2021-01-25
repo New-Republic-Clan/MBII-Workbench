@@ -19,6 +19,8 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
         public T Deserialize<T>(string input)
         {
 
+            LineNumber = 0;
+
             /* Remove Comments */
             input = Regex.Replace(input, "//.*", "");
 
@@ -73,6 +75,9 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
         private void ProcessLine(object output)
         {
 
+            if (Line().Trim() == "")
+                return;
+
             /* is this line the start of an object if so we create a blank object of that type */
             if (LineIsObject())
             {
@@ -84,10 +89,39 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
 
                 if (propertyInfo == null)
                 {
-                    throw new Exception($"Property {Line().ToLower()} not found  in {output.GetType().Name} \n\n Line {LineNumber}: {Line()}");
+
+                    /* FIX: for teams in siege file, in serialise, this must be done in reverse, the team name will never be a class, use "teamdetails" */
+                    if(output.GetType().GetProperties().Where(x => x.Name.ToLower() == "teams").Any())
+                    {
+                        var t = output.GetType().GetProperties().Where(x => x.Name.ToLower() == "teams").FirstOrDefault().GetValue(output);
+
+                        var g = (string)t.GetType().GetProperties().Where(x => x.Name.ToLower() == "team1").FirstOrDefault().GetValue(t);
+                        var c = Line();
+
+                        if (Line().ToLower() == (string) t.GetType().GetProperties().Where(x => x.Name.ToLower() == "team1").FirstOrDefault().GetValue(t).ToString().ToLower())
+                        {
+                            propertyInfo = output.GetType().GetProperties().Where(x => x.Name.ToLower() == "team1").FirstOrDefault();
+                        }
+
+                        if (Line().ToLower() == (string)t.GetType().GetProperties().Where(x => x.Name.ToLower() == "team2").FirstOrDefault().GetValue(t).ToString().ToLower())
+                        {
+                            propertyInfo = output.GetType().GetProperties().Where(x => x.Name.ToLower() == "team2").FirstOrDefault();
+                        }
+
+                        if (propertyInfo == null)
+                        {
+                            throw new Exception($"Property {Line().ToLower()} not found  in {output.GetType().Name} \n\n Line {LineNumber}: {Line()}");
+                        }
+
+                    }
+                    else
+                    {
+                        throw new Exception($"Property {Line().ToLower()} not found  in {output.GetType().Name} \n\n Line {LineNumber}: {Line()}");
+                    }
+
                 }
 
-                propertyInfo.SetValue(output, GenerateObject());
+                propertyInfo.SetValue(output, GenerateObject(propertyInfo.PropertyType.ToString()));
                 NextLine();
                 Process(propertyInfo.GetValue(output));
             }
@@ -112,18 +146,39 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
 
                 if(propertyType == typeof(string))
                 {
-                    propertyInfo.SetValue(output, propertyValue);
+                    try
+                    {
+                        propertyInfo.SetValue(output, propertyValue);
+                    }
+                    catch(Exception e)
+                    {
+                        throw new Exception($"Property {propertyName} with value {propertyValue} was not a string");
+                    }
+                   
                 }
 
                 if (propertyType == typeof(int?) || propertyType == typeof(int))
                 {
-                    propertyInfo.SetValue(output, int.Parse(propertyValue));
-
-                }
+                    try
+                    {
+                        propertyInfo.SetValue(output, int.Parse(propertyValue));
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception($"Property {propertyName} with value {propertyValue} was not a integer");
+                    }
+            }
 
                 if (propertyType == typeof(double?) || propertyType == typeof(double))
                 {
-                    propertyInfo.SetValue(output, double.Parse(propertyValue));
+                    try
+                    {
+                        propertyInfo.SetValue(output, double.Parse(propertyValue));
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception($"Property {propertyName} with value {propertyValue} was not a double");
+                    }
                 }
 
             }
@@ -268,11 +323,15 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
         }
 
         /* Generates an object */
-        private object GenerateObject()
+        private object GenerateObject(string type = null)
         {
 
+            if (type == null)
+                type = Line().ToLower();
+
+
             Type objectType = Assembly.GetExecutingAssembly().GetTypes()
-                      .Where(t => t.Namespace == "MB2_Workbench.Classes" && t.Name.ToLower() == Line().ToLower())
+                      .Where(t => t.Namespace == "MB2_Workbench.Classes" && t.Name.ToLower() == type.ToLower() || t.FullName.ToLower() == type.ToLower())
                       .ToList().FirstOrDefault();
 
             if (objectType == null)
@@ -280,12 +339,12 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
 
                 /* Try without the number to see if we get a match*/
                 objectType = Assembly.GetExecutingAssembly().GetTypes()
-                      .Where(t => t.Namespace == "MB2_Workbench.Classes" && t.Name.ToLower() == Regex.Replace(Line(), @"[\d-]", string.Empty).ToLower())
+                      .Where(t => t.Namespace == "MB2_Workbench.Classes" && t.Name.ToLower() == Regex.Replace(type.ToLower(), @"[\d-]", string.Empty).ToLower() || t.FullName.ToLower() == Regex.Replace(type.ToLower(), @"[\d-]", string.Empty).ToLower())
                       .ToList().FirstOrDefault();
 
                 if (objectType == null)
                 {
-                    throw new Exception($"Unable to find class for MB2_Workbench.Classes.{ Line() }");
+                    throw new Exception($"Unable to find class for MB2_Workbench.Classes.{ type }");
                 }
             }
 
@@ -306,12 +365,42 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
         /* Any property names we want to swap for another name used by matching in class */
         private string HandleSwaps(string name)
         {
+            name = name.Trim();
+
+            /* FIX: a common spelling mistake in imported files */
+            if (name.ToLower().Contains("missle"))
+                name = name.ToLower().Replace("missle", "missile");
 
             if (name.ToLower() == "customclip")
                 name = "clipsize";
 
+            if (name.ToLower() == "bpmodifier")
+                name = "BPMultiplier";
 
+            if (name.ToLower() == "apmodifier")
+                name = "APMultiplier";
 
+            if (name.ToLower() == "ammo")
+                name = "customAmmo";
+
+            if (name.ToLower() == "startarmor")
+                name = "armor";
+
+            if(name.ToLower() == "altflashsound")
+                name = "AltFlashSound1";
+
+            if (name.ToLower() == "redcustomicon")
+                name = "redicon";
+
+            if (name.ToLower() == "bluecustomicon")
+                name = "blueicon";
+
+            if (name.ToLower() == "speccustomicon")
+                name = "specicon";
+
+            /* FIX: as automap and automap0 are different but identify the same otherwise */
+            if (name.ToLower() == "automap")
+                name = "automaps";
             return name;
 
         }

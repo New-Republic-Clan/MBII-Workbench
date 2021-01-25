@@ -21,25 +21,29 @@ namespace MB2_Workbench.Classes
 		public string altMuzzleEffect { get; set; }
 		public string missileEffect { get; set; }
 
-		public string altMissleEffect { get; set; }
+		public string missileSound { get; set; }
+
+		public string altmissileSound { get; set; }
+
+		public string altMissileEffect { get; set; }
 
 		public string altMissileModel { get; set; }
 
 		public string missilewModel { get; set; }
 		public string missile3Effect { get; set; }
-		public string altMissileEffect { get; set; }
 		public string powerupShotEffect { get; set; }
 		public string chargeEffect { get; set; }
 		public int? customAmmo { get; set; }	
 
-	
+		public int? isMinigun { get; set; }
+
 		public int? clipsize { get; set; }
 		public string description { get; set; }
 
 		public string idleAnim { get; set; }
 		public string firingAnim { get; set; }
 
-		public string chargeSound { get; set; }
+		public string chargeSound { get; set; } 
 		public string overChargeEffect { get; set; }
 		public string missileModel { get; set; }
 		public string missileModel2 { get; set; }
@@ -49,8 +53,6 @@ namespace MB2_Workbench.Classes
 		public string missileMissEffect { get; set; }
 
 		public string missileHitHumanEffect { get; set; }
-
-		public string altMissleMissEffect { get; set; }
 
 		public string altMissileHitHumanEffect { get; set; }
 
@@ -82,7 +84,7 @@ namespace MB2_Workbench.Classes
 
 		public int? primHitscanShot { get; set; }
 
-		public int? primHitscanTracer { get; set; }
+		public double? primHitscanTracer { get; set; }
 
 		public int? altHitscanShot { get; set; }
 
@@ -103,6 +105,8 @@ namespace MB2_Workbench.Classes
 		public string altFlashSound3 { get; set; }
 
 		public string selectSound { get; set; }
+
+		public string newHandModel { get; set; }
 
 	}
 }

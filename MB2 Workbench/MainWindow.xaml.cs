@@ -31,59 +31,104 @@ namespace MB2_Workbench
             InitializeComponent();
 
 
+            /* All Imported Characters */
             List<Character> characters = new List<Character>();
-            int g = 0;
 
-            //This just loads when the window loads, we will eventually use the GUI but as of yet, lets just put our code here
+            /* All Imported Teams */
+            List<Team> teams = new List<Team>();
 
-            // We want to test on this PK3, eventually, we want to scan all PK3's in MBII dir and Base Dir and process them all
-            var pk3 = "E:\\SteamLibrary\\steamapps\\common\\Jedi Academy\\GameData\\MBII\\MBAssets3.pk3";
+            /* All Importer Map Sieges */
+            List<Siege> sieges = new List<Siege>();
 
-            using (ZipArchive zipFile = ZipFile.OpenRead(pk3))
+            string[] pk3s = Directory.GetFiles(@"E:\SteamLibrary\steamapps\common\Jedi Academy\GameData\MBII\", "*.pk3");
+
+            SiegeDeserializer seigeDeserializer = new SiegeDeserializer();
+
+            List<string> failedImports = new List<string>();
+
+            foreach(string pk3 in pk3s)
             {
-                foreach (ZipArchiveEntry entry in zipFile.Entries)
+                using (ZipArchive zipFile = ZipFile.OpenRead(pk3))
                 {
-
-                    // Character File (.MBCH) 
-                    if (entry.FullName.Contains("ext_data/mb2/character/"))
+                    foreach (ZipArchiveEntry entry in zipFile.Entries)
                     {
-                        if (entry.FullName.Contains(".mbch"))
+
+                        // Import Character File (.MBCH) 
+                        if (entry.FullName.Contains("ext_data/mb2/character/"))
                         {
-                            using (var stream = entry.Open())
+                            if (entry.FullName.ToLower().Contains(".mbch"))
                             {
-                                StreamReader reader = new StreamReader(stream);
-                                string text = reader.ReadToEnd();
-
-                                if (!text.Contains("RC_rep_Commander") && !text.Contains("xmas_Bobble") && !text.Contains("YA_Desann") && !text.Contains("_h_s_NSold"))
+                                using (var stream = entry.Open())
                                 {
-                                    var s = new SiegeDeserializer();
+                                    StreamReader reader = new StreamReader(stream);
+                                    string text = reader.ReadToEnd();
 
+                                    try
+                                    {
 
-
-                                    characters.Add(s.Deserialize<Character>(text));
-
-                                    g++;
-
+                                        characters.Add(seigeDeserializer.Deserialize<Character>(text));
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        failedImports.Add($"{System.IO.Path.GetFileName(pk3)}/{entry.FullName}: {e.Message}");
+                                    }
                                 }
-
-   
-
                             }
+                        }
 
+                        // Import Team File (.MBTC) 
+                        if (entry.FullName.Contains("ext_data/mb2/teamconfig/"))
+                        {
+                            if (entry.FullName.ToLower().Contains(".mbtc"))
+                            {
+                                using (var stream = entry.Open())
+                                {
+                                    StreamReader reader = new StreamReader(stream);
+                                    string text = reader.ReadToEnd();
+
+                                    try
+                                    {
+
+                                        teams.Add(seigeDeserializer.Deserialize<Team>(text));
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        failedImports.Add($"{System.IO.Path.GetFileName(pk3)}/{entry.FullName}: {e.Message}");
+                                    }
+                                }
+                            }
+                        }
+
+                        // Import Siege File (.SIEGE) 
+                        if (entry.FullName.Contains("maps/"))
+                        {
+                            if (entry.FullName.ToLower().Contains(".siege"))
+                            {
+                                using (var stream = entry.Open())
+                                {
+                                    StreamReader reader = new StreamReader(stream);
+                                    string text = reader.ReadToEnd();
+
+                                    try
+                                    {
+
+                                        Siege siege = seigeDeserializer.Deserialize<Siege>(text);
+
+                                        /* This allows us to keep track of what map this siege file belongs to */
+                                        siege.map = entry.FullName.ToLower().Replace(".siege", "").Replace(@"maps/","");
+
+                                        sieges.Add(siege);
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        failedImports.Add($"{System.IO.Path.GetFileName(pk3)}/{entry.FullName}: {e.Message}");
+                                    }
+                                }
+                            }
                         }
                     }
-                    // Also want to do stuff when we find
-                    // a map file, a .siege file, a team .mctc file
                 }
-
-                var i = g;
-
             }
-
         }
-
     }
-
-
-
 }

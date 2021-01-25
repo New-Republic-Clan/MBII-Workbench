@@ -23,7 +23,10 @@ namespace MB2_Workbench.Classes
 
         public double? ASmultiplier { get; set; }
         public double? BPMultiplier { get; set; }
+
         public double? CSMultiplier { get; set; }
+
+        public int? APBonus { get; set; }
 
         public double? damageAmplify { get; set; }
         public int? maxHealth { get; set; }
@@ -84,6 +87,8 @@ namespace MB2_Workbench.Classes
         public string WP_MeleeFlags { get; set; }
 
         public string WP_DisruptorFlags { get; set; }
+
+        public string WP_RepeaterFlags { get; set; }
 
         public string WP_TripMineFlags { get; set; }
 

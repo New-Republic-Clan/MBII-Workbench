@@ -19,6 +19,10 @@ namespace MB2_Workbench.Classes
         public string loopSound { get; set; }
 
         public string hitSound { get; set; }
+
+        public string selectSound { get; set; }
+
+        public string handShader { get; set; }
     }
 	
 }

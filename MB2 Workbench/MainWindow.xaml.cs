@@ -65,7 +65,6 @@ namespace MB2_Workbench
 
                                     try
                                     {
-
                                         characters.Add(seigeDeserializer.Deserialize<Character>(text));
                                     }
                                     catch (Exception e)

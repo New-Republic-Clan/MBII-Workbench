@@ -1,4 +1,5 @@
-﻿using MB2_Workbench.Enums;
+﻿using MB2_Workbench.Classes.Exceptions;
+using MB2_Workbench.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -144,6 +145,7 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
 
                 string propertyValue = GetPropertyValue();
 
+                /* is a string */
                 if(propertyType == typeof(string))
                 {
                     try
@@ -157,6 +159,7 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
                    
                 }
 
+                /* is an integer */
                 if (propertyType == typeof(int?) || propertyType == typeof(int))
                 {
                     try
@@ -167,8 +170,9 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
                     {
                         throw new Exception($"Property {propertyName} with value {propertyValue} was not a integer");
                     }
-            }
+                }
 
+                /* Is a double */
                 if (propertyType == typeof(double?) || propertyType == typeof(double))
                 {
                     try
@@ -179,6 +183,123 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
                     {
                         throw new Exception($"Property {propertyName} with value {propertyValue} was not a double");
                     }
+                }
+
+                /* Is an enum */
+                if (propertyType.IsEnum) {
+
+                    try
+                    {
+                        propertyInfo.SetValue(output, EnumFromString(propertyValue));
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception($"Property {propertyName} with value {propertyValue} was not an valid enum");
+                    }
+
+                }
+                /* Is a single enum */
+                if (propertyType.IsEnum)
+                {
+
+                    try
+                    {
+                        propertyInfo.SetValue(output, EnumFromString(propertyValue));
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception($"Property {propertyName} with value {propertyValue} was not an valid enum");
+                    }
+
+                }
+
+                /* A List holding MULTIPLE Enums */
+                /* These are the only ultra complex bits, these have to split a string, and entirely use reflection to find the correct enum */
+                if (propertyType.FullName.Contains("List") && !propertyType.FullName.Contains("Tuple"))
+                {
+
+                    string[] splitPropertyValues = propertyValue.Split("|");
+
+                    foreach(string splitPropertyValue in splitPropertyValues)
+                    {
+                       
+
+                        var enumList = propertyInfo.GetValue(output);
+                        var enumValue = EnumFromString(splitPropertyValue);
+
+                        if (enumValue == null)
+                        {
+                            throw new EnumNotFoundException($"Enum Value {splitPropertyValue} was not found");
+                        }
+
+                        try
+                        {
+
+                            if (enumList == null)
+                            {
+                                var listType = typeof(List<>).MakeGenericType(enumValue.GetType());
+                                enumList = Activator.CreateInstance(listType);
+                            }
+
+                            enumList.GetType().GetMethod("Add").Invoke(enumList, new[] { enumValue });
+
+                            propertyInfo.SetValue(output, enumList);
+                        }
+                        catch (Exception e)
+                        {
+
+                            throw new Exception($"Error parsing {propertyName} with enum/s {propertyValue}");
+                        }
+                    }
+
+                }
+
+                /* A List of Tuple<enum,int> ie, the enum has an int attached */
+                if (propertyType.FullName.Contains("List") && propertyType.FullName.Contains("Tuple"))
+                {
+
+                    string[] splitPropertyValues = propertyValue.Split("|");
+
+                    foreach (string splitPropertyValue in splitPropertyValues)
+                    {
+                       
+
+                            var tupleList = propertyInfo.GetValue(output);
+                            var splitEnumValues = splitPropertyValue.Split(",");
+                            var enumValue = EnumFromString(splitEnumValues[0]);
+                            int? intValue = null;
+
+                            if (splitEnumValues.Count() == 2) {
+                                intValue = int.Parse(splitEnumValues[1]);
+                            }
+
+                            if(enumValue == null)
+                            {
+                                throw new EnumNotFoundException($"Enum Value {splitEnumValues[0]} was not found");
+                            }
+
+                        try
+                        {
+
+                            Type turpleType = typeof(Tuple<,>).MakeGenericType(enumValue.GetType(), typeof(int?));
+                            object turpleValue = Activator.CreateInstance(turpleType, enumValue, intValue);
+
+                            if (tupleList == null)
+                            {
+                                var listType = typeof(List<>).MakeGenericType(turpleValue.GetType());
+                                tupleList = Activator.CreateInstance(listType);
+                            }
+
+                            tupleList.GetType().GetMethod("Add").Invoke(tupleList, new[] { turpleValue });
+
+                            propertyInfo.SetValue(output, tupleList);
+                        }
+                        catch (Exception e)
+                        {
+                            throw new Exception($"Error parsing {propertyName} with enum/s {propertyValue}");
+                        }
+                    }
+
                 }
 
             }
@@ -256,8 +377,6 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
                 return false;
             return true;
         }
-
- 
 
         /* Is current line start of an object */
         private Boolean LineIsObject()
@@ -405,7 +524,31 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
 
         }
 
+        /* We pass in enum string and this finds the enum */
+        private object EnumFromString(string value)
+        {
 
+            /* Fetch all Enums */
+            List<Type> enumTypes = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.Namespace == "MB2_Workbench.Enums").ToList();
+ 
+            object enumValue = null;
+
+            /* Loop Until we find the correct one */
+            foreach(Type enumType in enumTypes)
+            {
+                System.Enum.TryParse(enumType, value, out enumValue);
+                if (enumValue != null)
+                {
+                    enumValue = Convert.ChangeType(enumValue, enumType);
+                    break;
+
+                }
+
+            }
+
+            return enumValue;
+
+        }
 
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MB2_Workbench.Enums;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -7,17 +8,15 @@ namespace MB2_Workbench.Classes
     class ClassInfo
     {
         public string name { get; set; }
-        public string weapons { get; set; }
-        public string attributes { get; set; }
+        public List<Weapon> weapons { get; set; }
+        public List<Tuple<Attributes, int?>> attributes { get; set; }
         public string saber1 { get; set; }
         public string saber2 { get; set; }
 
         public int? saberColor { get; set; }
         public int? saber2Color { get; set; }
-
-        public string saberStyle { get; set; }
-        
-        public string forcepowers { get; set; }
+        public List<SaberStyles> saberStyle { get; set; }
+        public List<Tuple<ForcePowers, int?>> forcepowers { get; set; }
         public int? forcepool { get; set; }
         public double? APMultiplier { get; set; }
 
@@ -52,15 +51,15 @@ namespace MB2_Workbench.Classes
 
         public double? speed { get; set; }
 
-        public string mbClass { get; set; }
+        public CharacterClass mbClass { get; set; }
 
         public double? customRed { get; set; }
         public double? customGreen { get; set; }
         public double? customBlue { get; set; }
 
-        public string holdables { get; set; }
+        public List<Items> holdables { get; set; }
         
-        public string classFlags { get; set; }
+        public List<ClassFlags> classFlags { get; set; }
     
         public double? rateOfFire { get; set; }
 

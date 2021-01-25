@@ -21,6 +21,7 @@ namespace MB2_Workbench.Enums
     WP_TRIP_MINE,
     WP_DET_PACK,
     WP_CONCUSSION,
-    WP_BRYAR_OLD
+    WP_BRYAR_OLD,
+    WP_BRYAR_PISTOL
     }
 }

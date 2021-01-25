@@ -30,7 +30,10 @@ namespace MB2_Workbench
         {
             InitializeComponent();
 
-            
+
+            List<Character> characters = new List<Character>();
+            int g = 0;
+
             //This just loads when the window loads, we will eventually use the GUI but as of yet, lets just put our code here
 
             // We want to test on this PK3, eventually, we want to scan all PK3's in MBII dir and Base Dir and process them all
@@ -51,19 +54,29 @@ namespace MB2_Workbench
                                 StreamReader reader = new StreamReader(stream);
                                 string text = reader.ReadToEnd();
 
-                                var s = new SiegeDeserializer();
+                                if (!text.Contains("RC_rep_Commander") && !text.Contains("xmas_Bobble") && !text.Contains("YA_Desann") && !text.Contains("_h_s_NSold"))
+                                {
+                                    var s = new SiegeDeserializer();
 
-                                var i = s.Deserialize<Character>(text);
 
-                                var j = "done";
+
+                                    characters.Add(s.Deserialize<Character>(text));
+
+                                    g++;
+
+                                }
+
+   
+
                             }
 
                         }
                     }
-
                     // Also want to do stuff when we find
                     // a map file, a .siege file, a team .mctc file
                 }
+
+                var i = g;
 
             }
 

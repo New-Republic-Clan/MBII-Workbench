@@ -29,7 +29,7 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
             input = string.Join(" ", input.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries));
 
             /* Split and clean lines */
-            Lines = CleanLines(input.Split(Environment.NewLine, StringSplitOptions.None));
+            Lines = CleanLines(input.Split('\n'));
 
             /* Create object we are building for output */
             Output = Activator.CreateInstance(typeof(T));
@@ -46,7 +46,7 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
 
             for (int i = 0; i < lines.Count(); i++)
             {
-                lines[i] = lines[i].TrimStart();
+                lines[i] = lines[i].Trim();
             }
 
             return lines;
@@ -77,7 +77,16 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
             if (LineIsObject())
             {
 
-                PropertyInfo propertyInfo = output.GetType().GetProperty(Line().ToLower());
+                if(ShouldSkip())
+                    SkipObject();
+
+                PropertyInfo propertyInfo = output.GetType().GetProperties().Where(x => x.Name.ToLower() == HandleSwaps(Line().ToLower())).FirstOrDefault();
+
+                if (propertyInfo == null)
+                {
+                    throw new Exception($"Property {Line().ToLower()} not found  in {output.GetType().Name} \n\n Line {LineNumber}: {Line()}");
+                }
+
                 propertyInfo.SetValue(output, GenerateObject());
                 NextLine();
                 Process(propertyInfo.GetValue(output));
@@ -86,10 +95,14 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
             if (LineIsProperty())
             {
                 string propertyName = GetPropertyName();
+
+                propertyName = HandleSwaps(propertyName);
+
                 PropertyInfo propertyInfo = output.GetType().GetProperties().Where(x => x.Name.ToLower() == propertyName.ToLower()).FirstOrDefault();
 
                 if (propertyInfo == null)
                 {
+                    var i = Lines;
                     throw new Exception($"Property {propertyName} not found  in {output.GetType().Name} \n\n Line: {Line()}");
                 }
 
@@ -102,13 +115,13 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
                     propertyInfo.SetValue(output, propertyValue);
                 }
 
-                if (propertyType == typeof(int))
+                if (propertyType == typeof(int?) || propertyType == typeof(int))
                 {
                     propertyInfo.SetValue(output, int.Parse(propertyValue));
 
                 }
 
-                if (propertyType == typeof(double))
+                if (propertyType == typeof(double?) || propertyType == typeof(double))
                 {
                     propertyInfo.SetValue(output, double.Parse(propertyValue));
                 }
@@ -139,6 +152,38 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
                 return Lines[LineNumber + 1];
 
             return "";
+        }
+
+        private void SkipObject()
+        {
+
+            /* Properties we wish to skip */
+           
+                do
+                {
+                    NextLine();
+
+                    /* If finds another object within */
+                    if (PeekNextLine().Contains("{"))
+                    {
+                        SkipObject();
+                    }
+                }
+                while (EndOfObject() == false);
+
+            NextLine();
+            return;
+   
+        }
+
+        private Boolean ShouldSkip()
+        {
+
+            if (Line().Contains("SemiAuthPoints"))
+                return true;
+
+            return false;
+
         }
 
         /* Increments the line */
@@ -172,12 +217,13 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
         private Boolean LineIsProperty()
         {
 
-            if (Line().Contains(" "))
+            if (Line().Contains(" ") && Line().Length > 1)
                 return true;
             return false;
 
         }
 
+        /* Get a property name */
         private string GetPropertyName()
         {
             return Line().Split(" ")[0];
@@ -207,7 +253,7 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
                     value.Append(Line() + Environment.NewLine);
                     
                 }
-                while (!PeekNextLine().Contains("\""));
+                while (!PeekNextLine().EndsWith("\""));
 
                 /* Increment a final time */
                 NextLine();
@@ -221,19 +267,52 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
 
         }
 
+        /* Generates an object */
         private object GenerateObject()
         {
-            Type objectType = Type.GetType($"MB2_Workbench.Classes.{Line()}");
+
+            Type objectType = Assembly.GetExecutingAssembly().GetTypes()
+                      .Where(t => t.Namespace == "MB2_Workbench.Classes" && t.Name.ToLower() == Line().ToLower())
+                      .ToList().FirstOrDefault();
+
+            if (objectType == null)
+            {
+
+                /* Try without the number to see if we get a match*/
+                objectType = Assembly.GetExecutingAssembly().GetTypes()
+                      .Where(t => t.Namespace == "MB2_Workbench.Classes" && t.Name.ToLower() == Regex.Replace(Line(), @"[\d-]", string.Empty).ToLower())
+                      .ToList().FirstOrDefault();
+
+                if (objectType == null)
+                {
+                    throw new Exception($"Unable to find class for MB2_Workbench.Classes.{ Line() }");
+                }
+            }
+
             var obj = Activator.CreateInstance(objectType);
             return obj;
 
         }
 
+        /* Have we reached the end of an object? */
         private Boolean EndOfObject()
         {
-            if (Line() == "}")
+            if (Line() == ("}"))
                 return true;
             return false;
+
+        }
+
+        /* Any property names we want to swap for another name used by matching in class */
+        private string HandleSwaps(string name)
+        {
+
+            if (name.ToLower() == "customclip")
+                name = "clipsize";
+
+
+
+            return name;
 
         }
 

@@ -17,6 +17,10 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using MB2_Workbench.Classes;
+using System.Threading;
+using Microsoft.Win32;
+using MB2_Workbench.Popups;
+using Path = System.IO.Path;
 
 namespace MB2_Workbench
 {
@@ -24,110 +28,109 @@ namespace MB2_Workbench
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     /// 
+
     public partial class MainWindow : Window
     {
+        public Thread importJob;
+
+        public List<String> BasePK3s;
+
         public MainWindow()
         {
             InitializeComponent();
 
+            /* Hide Main Window */
+            this.Hide();
 
-            /* All Imported Characters */
-            List<Character> characters = new List<Character>();
-
-            /* All Imported Teams */
-            List<Team> teams = new List<Team>();
-
-            /* All Importer Map Sieges */
-            List<Siege> sieges = new List<Siege>();
-
-            string[] pk3s = Directory.GetFiles(@"E:\SteamLibrary\steamapps\common\Jedi Academy\GameData\MBII\", "*.pk3");
-
-            SiegeDeserializer seigeDeserializer = new SiegeDeserializer();
-
-            List<string> failedImports = new List<string>();
-
-            foreach(string pk3 in pk3s)
+            /* Check if OpenJK Directory has been set and if not ask for it */
+            if (Settings.GetValue("OpenJKDirectory") == null)
             {
-                using (ZipArchive zipFile = ZipFile.OpenRead(pk3))
+
+                MessageBox.Show("Please Locate your JediAcademy.exe" + Environment.NewLine + Environment.NewLine + @"Typically this will be in C:\Program Files (x86)\Steam\steamapps\common\Jedi Academy");
+                OpenFileDialog jaFinder = new OpenFileDialog();
+                jaFinder.Filter = "JediAcademy.exe|*.exe|All files (*.*)|*.*";
+                jaFinder.FilterIndex = 1;
+                jaFinder.DefaultExt = "*.exe";
+                jaFinder.CheckFileExists = true;
+                jaFinder.Title = "JediAcademy.exe";
+
+                if (jaFinder.ShowDialog() == true)
                 {
-                    foreach (ZipArchiveEntry entry in zipFile.Entries)
-                    {
-
-                        // Import Character File (.MBCH) 
-                        if (entry.FullName.Contains("ext_data/mb2/character/"))
-                        {
-                            if (entry.FullName.ToLower().Contains(".mbch"))
-                            {
-                                using (var stream = entry.Open())
-                                {
-                                    StreamReader reader = new StreamReader(stream);
-                                    string text = reader.ReadToEnd();
-
-                                    try
-                                    {
-                                        characters.Add(seigeDeserializer.Deserialize<Character>(text));
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        failedImports.Add($"{System.IO.Path.GetFileName(pk3)}/{entry.FullName}: {e.Message}");
-                                    }
-                                }
-                            }
-                        }
-
-                        // Import Team File (.MBTC) 
-                        if (entry.FullName.Contains("ext_data/mb2/teamconfig/"))
-                        {
-                            if (entry.FullName.ToLower().Contains(".mbtc"))
-                            {
-                                using (var stream = entry.Open())
-                                {
-                                    StreamReader reader = new StreamReader(stream);
-                                    string text = reader.ReadToEnd();
-
-                                    try
-                                    {
-
-                                        teams.Add(seigeDeserializer.Deserialize<Team>(text));
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        failedImports.Add($"{System.IO.Path.GetFileName(pk3)}/{entry.FullName}: {e.Message}");
-                                    }
-                                }
-                            }
-                        }
-
-                        // Import Siege File (.SIEGE) 
-                        if (entry.FullName.Contains("maps/"))
-                        {
-                            if (entry.FullName.ToLower().Contains(".siege"))
-                            {
-                                using (var stream = entry.Open())
-                                {
-                                    StreamReader reader = new StreamReader(stream);
-                                    string text = reader.ReadToEnd();
-
-                                    try
-                                    {
-
-                                        Siege siege = seigeDeserializer.Deserialize<Siege>(text);
-
-                                        /* This allows us to keep track of what map this siege file belongs to */
-                                        siege.map = entry.FullName.ToLower().Replace(".siege", "").Replace(@"maps/","");
-
-                                        sieges.Add(siege);
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        failedImports.Add($"{System.IO.Path.GetFileName(pk3)}/{entry.FullName}: {e.Message}");
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    Settings.SetValue("OpenJKDirectory", Path.GetDirectoryName(jaFinder.FileName));
                 }
+
+            }
+
+            /* Show splash screen */
+            SplashLoading splashLoading = new SplashLoading();
+            splashLoading.Show();
+            splashLoading.Activate();
+
+            /* Runs Import Job which builds our imported data treeview */
+            importJob = new Thread(() => {
+                ImportJob import = new ImportJob();
+                import.BeginImport();
+            });
+
+            importJob.Start();
+
+            TreeViewItem characters = new TreeViewItem();
+            characters.Header = "Characters";
+            CustomDataTree.Items.Add(characters);
+
+            TreeViewItem teams = new TreeViewItem();
+            teams.Header = "Teams";
+            CustomDataTree.Items.Add(teams);
+
+        }
+
+
+        private void NewProject_Click(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+
+
+            NewProject newProject = new NewProject();
+
+
+            foreach(string pk3 in BasePK3s)
+            {
+                newProject.BaseMaps.Items.Add(Path.GetFileName(pk3).ToLower().Replace(".pk3",""));
+            }
+
+            newProject.Show();
+            newProject.Activate();
+
+        }
+            
+
+        /* Runs when a Imported Game Data Tree Item is selected */
+        private void ImportedDataTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            TreeViewItem SelectedItem = ImportedDataTree.SelectedItem as TreeViewItem;
+            switch (SelectedItem.Tag.ToString())
+            {
+                case "character":
+                    ImportedDataTree.ContextMenu = ImportedDataTree.Resources["CharacterContext"] as System.Windows.Controls.ContextMenu;
+                    break;
+                case "team":
+                    ImportedDataTree.ContextMenu = ImportedDataTree.Resources["TeamContext"] as System.Windows.Controls.ContextMenu;
+                    break;
             }
         }
+
+        /* Runs when a Custom Game Data Tree Item is selected */
+        private void CustomDataTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            TreeViewItem SelectedItem = ImportedDataTree.SelectedItem as TreeViewItem;
+            switch (SelectedItem.Tag.ToString())
+            {
+                case "character":
+                    ImportedDataTree.ContextMenu = ImportedDataTree.Resources["CharacterContext"] as System.Windows.Controls.ContextMenu;
+                    break;
+            }
+        }
+
     }
+
+
 }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MB2_Workbench.Classes
 {
-    class Objective
+    public class Objective
     {
         public int? final { get; set; }
         public string goalname { get; set; }

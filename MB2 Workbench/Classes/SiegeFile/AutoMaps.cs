@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MB2_Workbench.Classes
 {
-    class AutoMaps
+    public class AutoMaps
     {
         public AutoMap autoMap0 { get; set; }
         public AutoMap autoMap1 { get; set; }

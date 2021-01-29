@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MB2_Workbench.Enums
 {
-    enum Weapon
+    public enum Weapon
     {
     WP_STUN_BATON,
     WP_MELEE,

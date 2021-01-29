@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MB2_Workbench.Enums
 {
-    enum CharacterClass
+    public enum CharacterClass
     {
         MB_CLASS_SOLDIER,	       
         MB_CLASS_JEDI,      

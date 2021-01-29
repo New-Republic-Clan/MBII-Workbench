@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MB2_Workbench.Classes
 {
-    class WeaponInfo
+	public class WeaponInfo
     {
 		public string weaponToReplace { get; set; }
 		public string weaponBasedOff { get; set; }

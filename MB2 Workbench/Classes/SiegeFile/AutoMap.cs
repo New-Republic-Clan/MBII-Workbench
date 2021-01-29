@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MB2_Workbench.Classes
 {
-    class AutoMap
+    public class AutoMap
     {
         public string radargraphic { get; set; }
         public string radargraphicfull { get; set; }

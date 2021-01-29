@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MB2_Workbench.Classes
 {
-    class HelpIcons
+    public class HelpIcons
     {
         public HelpIcon helpIcon0 { get; set; }
         public HelpIcon helpIcon1 { get; set; }

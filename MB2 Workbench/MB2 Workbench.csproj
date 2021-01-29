@@ -5,6 +5,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>MB2_Workbench</RootNamespace>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>xcode.ico</ApplicationIcon>
   </PropertyGroup>
 
 </Project>

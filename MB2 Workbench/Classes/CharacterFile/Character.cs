@@ -4,12 +4,11 @@ using System.Text;
 
 namespace MB2_Workbench.Classes
 {
-    class Character
+    public class Character
     {
 
         public ClassInfo classinfo { get; set; }
         public string description { get; set; }
-
         public WeaponInfo weaponInfo0 { get; set; }
         public WeaponInfo weaponInfo1 { get; set; }
         public WeaponInfo weaponInfo2 { get; set; }
@@ -31,6 +30,21 @@ namespace MB2_Workbench.Classes
         public ForceInfo forceInfo7 { get; set; }
         public ForceInfo forceInfo8 { get; set; }
         public ForceInfo forceInfo9 { get; set; }
+
+        public string name
+        {
+
+            get
+            {
+                if (description == null) return null;
+                return description.Split('\n')[0].Trim();
+            }
+            private set
+            {
+                
+            }
+
+        }
 
     }
 }

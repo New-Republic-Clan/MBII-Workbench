@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MB2_Workbench.Enums
 {
-    enum SaberStyles
+    public enum SaberStyles
     {
         SS_FAST,     
         SS_MEDIUM,  

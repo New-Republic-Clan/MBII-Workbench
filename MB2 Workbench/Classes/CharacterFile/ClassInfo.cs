@@ -5,7 +5,7 @@ using System.Text;
 
 namespace MB2_Workbench.Classes
 {
-    class ClassInfo
+    public class ClassInfo
     {
         public string name { get; set; }
         public List<Weapon> weapons { get; set; }

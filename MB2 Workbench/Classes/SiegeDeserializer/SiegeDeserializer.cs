@@ -532,6 +532,7 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
             List<Type> enumTypes = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.Namespace == "MB2_Workbench.Enums").ToList();
  
             object enumValue = null;
+            value = value.ToUpper();
 
             /* Loop Until we find the correct one */
             foreach(Type enumType in enumTypes)

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MB2_Workbench.Classes
 {
-    class Siege
+    public class Siege
     {
         /* This is just a reference field, not in original spec */
         public string map { get; set; }

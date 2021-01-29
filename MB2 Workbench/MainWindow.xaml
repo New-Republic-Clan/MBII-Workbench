@@ -5,9 +5,51 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MB2_Workbench"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MBII Workbench" Height="1050" Width="1680
+        " WindowState="Maximized">
     <Grid>
-        <Button Content="Button" HorizontalAlignment="Left" Margin="76,326,0,0" VerticalAlignment="Top"/>
-
+        <TreeView  x:Name="ImportedDataTree" Margin="1298,71,10,0" SelectedItemChanged="ImportedDataTree_SelectedItemChanged">
+            <TreeView.Resources>
+                <ContextMenu x:Key ="CharacterContext"  StaysOpen="true">
+                    <MenuItem Header="View"/>
+                    <MenuItem Header="Clone"/>
+                </ContextMenu>
+                <ContextMenu x:Key="TeamContext"  StaysOpen="true">
+                    <MenuItem Header="View"/>
+                    <MenuItem Header="Clone"/>
+                </ContextMenu>
+            </TreeView.Resources>
+        </TreeView>
+        <TreeView  x:Name="CustomDataTree" Margin="10,71,1298,0" SelectedItemChanged="CustomDataTree_SelectedItemChanged">
+            <TreeView.Resources>
+                <ContextMenu x:Key ="CharacterContext"  StaysOpen="true">
+                    <MenuItem Header="View"/>
+                    <MenuItem Header="Remove"/>
+                </ContextMenu>
+            </TreeView.Resources>
+        </TreeView>
+        <StackPanel>
+            <ToolBar>
+                <Menu>
+                    <MenuItem Header="File">
+                        <MenuItem Header="New"/>
+                        <MenuItem Header="Open"/>
+                        <MenuItem Header="Save"/>
+                        <MenuItem Header="Save As"/>
+                        <Separator />
+                        <MenuItem Header="Export"/>
+                    </MenuItem>
+                    <MenuItem Header="Edit">
+                        <MenuItem Header="Preferences"/>
+                    </MenuItem>
+                    <MenuItem Header="Help">
+                        <MenuItem Header="Online Help"/>
+                        <MenuItem Header="About"/>
+                    </MenuItem>
+                </Menu>
+            </ToolBar>
+        </StackPanel>
+        <Label Content="PK3 Data" Margin="10,41,1394,963" Height="30" Width="276"/>
+        <Label Content="Game Data" Margin="1298,41,106,963" Height="30" Width="276"/>
     </Grid>
 </Window>

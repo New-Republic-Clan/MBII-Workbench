@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MB2_Workbench.Enums
 {
-    enum Items
+    public enum Items
     {
         HI_MEDPAC,
         HI_MEDPAC_BIG,
@@ -14,6 +14,7 @@ namespace MB2_Workbench.Enums
         HI_AMMODISP,
         HI_EWEB,
         HI_CLOAK,
-        HI_SHIELD
+        HI_SHIELD,
+        HI_SEEKER
     }
 }

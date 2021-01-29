@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MB2_Workbench.Classes
 {
-    class LevelshotDesc
+    public class LevelshotDesc
     {
         public Desc desc1 { get; set; }
         public Desc desc2 { get; set; }

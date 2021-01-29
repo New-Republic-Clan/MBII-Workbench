@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MB2_Workbench.Classes
 {
-    class HelpIcon
+    public class HelpIcon
     {
         public int? radius { get; set; }
 

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MB2_Workbench.Classes
 {
-    class ForceInfo
+    public class ForceInfo
     {
 
         public string forceToReplace { get; set; }

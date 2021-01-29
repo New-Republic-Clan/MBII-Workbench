@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MB2_Workbench.Enums
 {
-    enum Attributes
+	public enum Attributes
     {
 		MB_ATT_PISTOL,
 		MB_ATT_BLASTER,

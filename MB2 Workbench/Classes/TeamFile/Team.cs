@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MB2_Workbench.Classes
 {
-    class Team
+    public class Team
     {
 
         public string name { get; set; }

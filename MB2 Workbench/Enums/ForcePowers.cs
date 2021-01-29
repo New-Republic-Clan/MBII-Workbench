@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MB2_Workbench.Enums
 {
-    enum ForcePowers
+    public enum ForcePowers
     {
         FP_LEVITATION,
         FP_SPEED,

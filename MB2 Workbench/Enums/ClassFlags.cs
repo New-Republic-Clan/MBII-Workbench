@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MB2_Workbench.Enums
 {
-    enum ClassFlags
+    public enum ClassFlags
     {
         CFL_MORESABERDMG,
         CFL_STRONGAGAINSTPHYSICAL,
@@ -29,6 +29,7 @@ namespace MB2_Workbench.Enums
         CFL_NO_FUEL_USE,
         CFL_WFLAMETHROWER,
         CFL_BLOODYMELEE,
-        CFL_DISMEMBERFRAGILE
+        CFL_DISMEMBERFRAGILE,
+        CFL_NO_JETPACK_COOLDOWN
     }
 }

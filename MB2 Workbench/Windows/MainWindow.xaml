@@ -1,0 +1,97 @@
+﻿<Window x:Class="MB2_Workbench.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MB2_Workbench"
+        mc:Ignorable="d"
+        Title="MBII Workbench" Height="1050" Width="1680" WindowState="Maximized" Background="{DynamicResource {x:Static SystemColors.InactiveSelectionHighlightBrushKey}}">
+    <Grid>
+        <TreeView  x:Name="ImportedDataTree" Margin="1370,71,10,450" SelectedItemChanged="ImportedDataTree_SelectedItemChanged" ItemsSource="{Binding Path=ImportedData}">
+            <TreeView.Resources>
+                <ContextMenu x:Key="TeamContext"  StaysOpen="true">
+                    <MenuItem Header="View"/>
+                    <MenuItem Header="Add to Project"/>
+                </ContextMenu>
+            </TreeView.Resources>
+            <TreeView.ItemContainerStyle>
+                <Style TargetType="{x:Type TreeViewItem}">
+                    <EventSetter Event="TreeViewItem.PreviewMouseRightButtonDown" Handler="TreeViewItem_PreviewMouseRightButtonDown"/>
+                </Style>
+            </TreeView.ItemContainerStyle>
+            <TreeView.Items>
+                <TreeViewItem x:Name="ImportedCharacters" Header="Characters" IsExpanded="True" >
+                    <TreeViewItem.ItemTemplate>
+                        <HierarchicalDataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <StackPanel.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Add to Project" Click="AddImportedCharacterToProject_Click"/>
+                                    </ContextMenu>
+                                </StackPanel.ContextMenu>
+                                <TextBlock x:Name="prettyName" Text="{Binding name}" Tag="{Binding classinfo.name}" />
+                            </StackPanel>
+                        </HierarchicalDataTemplate>
+                    </TreeViewItem.ItemTemplate>
+                </TreeViewItem>
+            </TreeView.Items>
+        </TreeView>
+        <TreeView x:Name="CustomDataTree" Margin="10,71,1370,0" SelectedItemChanged="CustomDataTree_SelectedItemChanged">
+            <TreeView.Resources>
+                <ContextMenu x:Key ="CharacterContext"  StaysOpen="true">
+                    <MenuItem Header="Edit" Click="EditProjectCharacter_Click"/>
+                    <MenuItem Header="Remove"/>
+                </ContextMenu>
+                <ContextMenu x:Key="TeamContext"  StaysOpen="true">
+                    <MenuItem Header="Edit"/>
+                    <MenuItem Header="Remove"/>
+                </ContextMenu>
+                <ContextMenu x:Key="SiegeContext"  StaysOpen="true">
+                    <MenuItem Header="Edit"/>
+                </ContextMenu>
+                <ContextMenu x:Key="WeaponModelsContext"  StaysOpen="true">
+                    <MenuItem Header="Bundle GML"/>
+                    <MenuItem Header="Bundle Existing"/>                    
+                </ContextMenu>
+                <ContextMenu x:Key="PlayerModelsContext"  StaysOpen="true">
+                    <MenuItem Header="Bundle GML"/>
+                    <MenuItem Header="Bundle Existing"/>
+                </ContextMenu>
+                <ContextMenu x:Key="WeaponModelContext"  StaysOpen="true">
+                    <MenuItem Header="Remove"/>
+                </ContextMenu>
+                <ContextMenu x:Key="PlayerModelContext"  StaysOpen="true">
+                    <MenuItem Header="Remove"/>
+                </ContextMenu>
+            </TreeView.Resources>
+            <TreeView.ItemContainerStyle>
+                <Style TargetType="{x:Type TreeViewItem}">
+                    <EventSetter Event="TreeViewItem.PreviewMouseRightButtonDown" Handler="TreeViewItem_PreviewMouseRightButtonDown"/>
+                </Style>
+            </TreeView.ItemContainerStyle>
+        </TreeView>
+
+        <!-- Top Menu -->
+        <StackPanel Height="25" VerticalAlignment="Top">
+            <ToolBar Background="#FFF0F0F0">
+                <Menu>
+                    <MenuItem Header="File">
+                        <MenuItem Header="New Project" Click="MenuItemNew_Click"/>
+                        <MenuItem Header="Open Project"/>
+                        <MenuItem Header="Save"/>
+                        <MenuItem Header="Save As"/>
+                        <Separator />
+                        <MenuItem Header="Export PK3"/>
+                    </MenuItem>
+                    <MenuItem Header="Edit">
+                        <MenuItem Header="Workbench Preferences"/>
+                    </MenuItem>
+                    <MenuItem Header="Help">
+                        <MenuItem Header="Online Help"/>
+                        <MenuItem Header="About"/>
+                    </MenuItem>
+                </Menu>
+            </ToolBar>
+        </StackPanel>
+    </Grid>
+</Window>

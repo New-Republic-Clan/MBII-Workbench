@@ -8,4 +8,12 @@
     <ApplicationIcon>xcode.ico</ApplicationIcon>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Resources\Images\user.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Images\user.png" />
+  </ItemGroup>
+
 </Project>

@@ -1,5 +1,5 @@
 ﻿using MB2_Workbench.Classes.Exceptions;
-using MB2_Workbench.Enums;
+using MB2_Workbench.DataTypes.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,14 +12,27 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
     public class SiegeDeserializer
     {
 
+        /* Namespaces where to find various classes and enums through reflection */
+        private List<string> NamespaceDataTypes;
+
         private int LineNumber = 0;
         private string[] Lines;
 
         private object Output;
 
-        public T Deserialize<T>(string input)
+        public T Deserialize<T>(string input, List<string> namespaceDataTypes = null)
         {
 
+            /* Load a list of namespaces where we can find the Enums and Data Types from */
+            if(namespaceDataTypes == null)
+            {
+                NamespaceDataTypes = Settings.NamespaceDataTypes;
+            }
+            else
+            {
+                NamespaceDataTypes = namespaceDataTypes;
+            }
+                
             LineNumber = 0;
 
             /* Remove Comments */
@@ -450,7 +463,7 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
 
 
             Type objectType = Assembly.GetExecutingAssembly().GetTypes()
-                      .Where(t => t.Namespace == "MB2_Workbench.Classes" && t.Name.ToLower() == type.ToLower() || t.FullName.ToLower() == type.ToLower())
+                      .Where(t => NamespaceDataTypes.Contains(t.Namespace) && t.Name.ToLower() == type.ToLower() || t.FullName.ToLower() == type.ToLower())
                       .ToList().FirstOrDefault();
 
             if (objectType == null)
@@ -458,12 +471,12 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
 
                 /* Try without the number to see if we get a match*/
                 objectType = Assembly.GetExecutingAssembly().GetTypes()
-                      .Where(t => t.Namespace == "MB2_Workbench.Classes" && t.Name.ToLower() == Regex.Replace(type.ToLower(), @"[\d-]", string.Empty).ToLower() || t.FullName.ToLower() == Regex.Replace(type.ToLower(), @"[\d-]", string.Empty).ToLower())
+                      .Where(t => NamespaceDataTypes.Contains(t.Namespace) && t.Name.ToLower() == Regex.Replace(type.ToLower(), @"[\d-]", string.Empty).ToLower() || t.FullName.ToLower() == Regex.Replace(type.ToLower(), @"[\d-]", string.Empty).ToLower())
                       .ToList().FirstOrDefault();
 
                 if (objectType == null)
                 {
-                    throw new Exception($"Unable to find class for MB2_Workbench.Classes.{ type }");
+                    throw new Exception($"Unable to find class for {NamespaceDataTypes}.{ type }");
                 }
             }
 
@@ -529,8 +542,8 @@ namespace MB2_Workbench.Classes.SiegeDeserializer
         {
 
             /* Fetch all Enums */
-            List<Type> enumTypes = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.Namespace == "MB2_Workbench.Enums").ToList();
- 
+            List<Type> enumTypes = Assembly.GetExecutingAssembly().GetTypes().Where(t => Settings.NamespaceDataTypes.Contains(t.Namespace) && t.IsEnum).ToList();
+
             object enumValue = null;
             value = value.ToUpper();
 

@@ -1,25 +1,20 @@
-﻿using MB2_Workbench.Classes;
-using MB2_Workbench.Classes.SiegeDeserializer;
+﻿using MB2_Workbench.Classes.SiegeDeserializer;
 using MB2_Workbench.DataImport;
 using MB2_Workbench.DataTypes.Character;
 using MB2_Workbench.DataTypes.Map;
 using MB2_Workbench.DataTypes.Siege;
 using MB2_Workbench.DataTypes.Team;
 using MB2_Workbench.Classes.Helpers;
-using MB2_Workbench.Popups;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using MB2_Workbench.DataTypes.Skin;
 using MB2_Workbench.DataTypes.Model;
 using System.Collections.ObjectModel;
+using MB2_Workbench.Windows.Splash;
 
 namespace MB2_Workbench
 {
@@ -238,26 +233,23 @@ namespace MB2_Workbench
                 }
             }
 
-
             /* Any Additional Filtering or manipulation of imported data */
-
             ImportedData.importedCharacters = new ObservableCollection<Character>(ImportedData.importedCharacters
                 .Where(x => x.name != null &&  x.name.Trim() != "")
                 .OrderBy(x => x.name).ToList());
 
-            Thread.Sleep(1);
-
             Application.Current.Dispatcher.Invoke(() => {
 
+                /* Close Splash */
                 SplashLoading splashLoading = WindowFinder.FindOpenWindowByType<SplashLoading>();
                 splashLoading.Close();
        
                 MainWindow mainWindow = WindowFinder.FindOpenWindowByType<MainWindow>();
 
-                /* Assign Data Sources to treeviews */
+                /* Setup Imported Data Treeview Datasources */
                 mainWindow.ImportedCharacters.ItemsSource = ImportedData.importedCharacters;
 
-                
+                /* Show Window */
                 mainWindow.Show();
                 mainWindow.Activate();
 

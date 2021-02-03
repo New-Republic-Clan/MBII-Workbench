@@ -11,7 +11,7 @@ namespace MB2_Workbench.Classes.Extensions
     public static class TeamExtensions
     {
         /// <summary>Fetch a List of characters used by this team</summary>
-        public static List<Character> TeamToCharacterList(this Team team)
+        public static List<Character> Characters(this Team team)
         {
 
             List<Character> foundCharacters = ImportedData.importedCharacters.Where(x =>

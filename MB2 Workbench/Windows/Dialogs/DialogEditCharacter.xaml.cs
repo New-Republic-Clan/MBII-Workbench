@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MB2_Workbench.DataTypes.Character;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows;
@@ -10,17 +11,24 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace MB2_Workbench.Popups
+namespace MB2_Workbench.Windows.Dialogs
 {
     /// <summary>
-    /// Interaction logic for Loading.xaml
+    /// Interaction logic for DialogEditCharacter.xaml
     /// </summary>
-    public partial class SplashLoading : Window
+    public partial class DialogEditCharacter : Window
     {
-        public SplashLoading()
+        public Character CharacterBeingEdited;
+
+        public DialogEditCharacter(Character characterBeingEdited)
         {
 
             InitializeComponent();
+            CharacterBeingEdited = characterBeingEdited;
+
+
+
+
         }
     }
 }

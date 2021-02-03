@@ -1,0 +1,26 @@
+﻿<Window x:Class="MB2_Workbench.Windows.Splash.SplashLoading"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MB2_Workbench"
+        mc:Ignorable="d"
+        Title="Loading" Height="309" Width="608" WindowStyle="None" WindowStartupLocation="CenterScreen" ResizeMode="CanResizeWithGrip" AllowsTransparency="True" MouseLeftButtonDown="Window_MouseLeftButtonDown">
+    <Grid Margin="0,0,0,0">
+        <Grid.Background>
+            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                <GradientStop Color="#FF041325"/>
+                <GradientStop Color="#FF1A569E" Offset="1"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+        <ProgressBar x:Name="LoadingProgressBar1" HorizontalAlignment="Left" Height="16" VerticalAlignment="Top" Width="341" Margin="235,210,0,0" Foreground="#FF1A3199" Value="0"/>
+        <Label x:Name="StatusLabel" Content="Loading..." Margin="229,182,10,99" BorderThickness="0,0,0,0" Foreground="#FFFDFDFD"/>
+        <Rectangle HorizontalAlignment="Left" Height="353" Stroke="Black" VerticalAlignment="Center" Width="194" Fill="#CC12366A"/>
+        <Label Content="MB2 Workbench" HorizontalAlignment="Left" Margin="10,25,0,0" VerticalAlignment="Top" Height="35" Width="340" FontFamily="Bahnschrift SemiLight" FontSize="20" Foreground="#FFFDFDFD"/>
+        <Label Content="V1.00" HorizontalAlignment="Left" Margin="10,60,0,0" VerticalAlignment="Top" Height="35" Width="341" FontFamily="Bahnschrift Light" FontSize="14" Foreground="#FFFDFDFD" />
+        <Image Source="/xcode.png" Margin="58,109,472,128"/>
+        <Label x:Name="SplashText" Content="2021-2022" HorizontalAlignment="Left" Margin="464,288,0,0" VerticalAlignment="Top" Height="22" Width="153" FontFamily="Bahnschrift Light" FontSize="8" Foreground="#FFF7F7F7"/>
+        <Label Content="Created By SEAL Team Ricks
+               " HorizontalAlignment="Left" Margin="464,278,0,0" VerticalAlignment="Top" Height="21" Width="153" FontFamily="Bahnschrift Light" FontSize="8" Foreground="#FFF7F7F7"/>
+    </Grid>
+</Window>

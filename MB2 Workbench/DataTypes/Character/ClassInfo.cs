@@ -122,6 +122,8 @@ namespace MB2_Workbench.DataTypes.Character
 
         public string jetpackStartSound { get; set; }
 
+        public string jetpackStopSound { get; set; }
+
         public string forceallignment { get; set; }
 
         public int? respawnWait { get; set; }

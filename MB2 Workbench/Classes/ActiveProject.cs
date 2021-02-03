@@ -1,25 +1,59 @@
-﻿using MB2_Workbench.DataTypes.Character;
-using MB2_Workbench.DataTypes.Map;
-using MB2_Workbench.DataTypes.Siege;
-using MB2_Workbench.DataTypes.Team;
+﻿using MB2_Workbench.Classes.Helpers;
+using MB2_Workbench.DataTypes.Character;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace MB2_Workbench.Classes
 {
-    /* Represents the current loaded project, static as there can only ever be one loaded project */
     public static class ActiveProject
     {
+        public static Project Project = new Project();
 
-        public static string name { get; set; }
-        public static Map map { get; set; }
-        public static string directory { get; set; }
-        public static string file { get; set; }
+        public static void Save()
+        {
 
-        public static Siege siege { get; set; }
-        public static List<Character> characters { get; set; }
-        public static List<Team> teams { get; set; }
+            if (File.Exists(Project.file))
+                File.Delete(Project.file);
+
+            string jsonString = JsonConvert.SerializeObject(Project);
+
+            // Create a file to write to.
+            using (StreamWriter sw = File.CreateText(Project.file))
+            {
+                sw.WriteLine(jsonString);
+            }
+        }
+
+        public static void Load(string file)
+        {
+
+            if (File.Exists(file))
+            {
+                string jsonString = File.ReadAllText(file);
+                ActiveProject.Project = JsonConvert.DeserializeObject<Project>(jsonString);
+
+                TreeAddSources();
+            }
+
+        }
+
+        public static void TreeAddSources()
+        {
+
+            MainWindow mainWindow = WindowFinder.FindOpenWindowByType<MainWindow>();
+
+            mainWindow.ProjectCharacters.ItemsSource = ActiveProject.Project.characters;
+
+            /* Show the Tree Views */
+            mainWindow.ProjectDataTree.Visibility = Visibility.Visible;
+            mainWindow.ImportedDataTree.Visibility = Visibility.Visible;
+        }
+
 
     }
 }

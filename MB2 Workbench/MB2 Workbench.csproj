@@ -10,10 +10,34 @@
 
   <ItemGroup>
     <None Remove="Resources\Images\user.png" />
+    <None Remove="xcode.ico" />
+    <None Remove="xcode.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1-beta1" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="Resources\Images\user.png" />
+    <Resource Include="xcode.ico" />
+    <Resource Include="xcode.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Windows\Dialogs\DialogCloneCharacter.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Windows\Dialogs\DialogNewProject - Copy.xaml.cs">
+      <SubType>Code</SubType>
+      <DependentUpon>DialogNewProject.xaml.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Windows\Dialogs\DialogCloneCharacter.xaml">
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
 
 </Project>

@@ -19,10 +19,11 @@ using System.Windows.Shapes;
 using MB2_Workbench.Classes;
 using System.Threading;
 using Microsoft.Win32;
-using MB2_Workbench.Popups;
 using Path = System.IO.Path;
 using MB2_Workbench.DataTypes.Character;
 using MB2_Workbench.DataImport;
+using MB2_Workbench.Windows.Dialogs;
+using MB2_Workbench.Windows.Splash;
 
 namespace MB2_Workbench
 {
@@ -33,161 +34,128 @@ namespace MB2_Workbench
 
     public partial class MainWindow : Window
     {
-        public Thread ImportJob;
-
+        /* Application Load */
         public MainWindow()
         {
             InitializeComponent();
 
-            /* Hide Main Window */
+            /* Hide Main Window while we load */
             this.Hide();
 
             /* Check if OpenJK Directory has been set and if not ask for it */
             if (Settings.GetValue("OpenJKDirectory") == null)
-            {
                 Settings.FindOpenJKDirectory();
-            }
 
-
-            /* Create Home Directory */
+            /* Create Home Directory for projects and settings */
             if (!Directory.Exists(Settings.UsersProjectHome))
-            {
                 Directory.CreateDirectory(Settings.UsersProjectHome);
-            }
 
             /* Show Splash Screen While we load */
             SplashLoading splashLoading = new SplashLoading();
             splashLoading.Show();
             splashLoading.Activate();
 
-            /* Runs Import Job which builds our Imported Data TreeView */
-            ImportJob = new Thread(() => {
+            /* Runs Import Job which fetches our imported data */
+            Thread ImportJob = new Thread(() => {
                 ImportJob import = new ImportJob();
                 import.BeginImport();
             });
 
             ImportJob.Start();
 
-            /* Now hide it until a new project is started or one has been loaded */
-            //CustomDataTree.Visibility = Visibility.Hidden;
-            //ImportedDataTree.Visibility = Visibility.Hidden;
+            /* Now hide these until a project is loaded / created */
+            ProjectDataTree.Visibility = Visibility.Hidden;
+            ImportedDataTree.Visibility = Visibility.Hidden;
 
         }
 
-        /* Runs when a Imported Game Data Tree Item is selected */
-        private void ImportedDataTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-        {
-            TreeViewItem SelectedItem = ImportedDataTree.SelectedItem as TreeViewItem;
-            if (SelectedItem == null || SelectedItem.Tag == null)
-                return;
+        /* ---------------------------------------*/
+        /* TOOL BAR ACTIONS */
+        /* ---------------------------------------*/
 
-            switch (SelectedItem.Tag.ToString())
-            {
-                case "character":
-                    ImportedDataTree.ContextMenu = ImportedDataTree.Resources["CharacterContext"] as System.Windows.Controls.ContextMenu;
-                    break;
-                case "team":
-                    ImportedDataTree.ContextMenu = ImportedDataTree.Resources["TeamContext"] as System.Windows.Controls.ContextMenu;
-                    break;
-            }
-        }
-
-        /* Ensures right clicking a item (ie for context menu) selects the item first */
-        private void TreeViewItem_PreviewMouseRightButtonDown(object sender, MouseEventArgs e)
-        {
-            TreeViewItem item = sender as TreeViewItem;
-            if (item != null)
-            {
-                //item.Focus();
-                //e.Handled = true;
-            }
-        }
-
-        /* Runs when a Custom Game Data Tree Item is selected */
-        private void CustomDataTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-        {
-            TreeViewItem SelectedItem = CustomDataTree.SelectedItem as TreeViewItem;
-            if (SelectedItem == null || SelectedItem.Tag == null)
-                return;
-
-            switch (SelectedItem.Tag.ToString())
-            {
-                case "character":
-                    CustomDataTree.ContextMenu = CustomDataTree.Resources["CharacterContext"] as System.Windows.Controls.ContextMenu;
-                    break;
-
-                case "team":
-                    CustomDataTree.ContextMenu = CustomDataTree.Resources["TeamContext"] as System.Windows.Controls.ContextMenu;
-                    break;
-
-                case "siege":
-                    CustomDataTree.ContextMenu = CustomDataTree.Resources["SiegeContext"] as System.Windows.Controls.ContextMenu;
-                    break;
-
-                case "playerModels":
-                    CustomDataTree.ContextMenu = CustomDataTree.Resources["PlayerModelsContext"] as System.Windows.Controls.ContextMenu;
-                    break;
-
-                case "playerModel":
-                    CustomDataTree.ContextMenu = CustomDataTree.Resources["PlayerModelContext"] as System.Windows.Controls.ContextMenu;
-                    break;
-
-                case "weaponModels":
-                    CustomDataTree.ContextMenu = CustomDataTree.Resources["WeaponModelsContext"] as System.Windows.Controls.ContextMenu;
-                    break;
-
-                case "weaponModel":
-                    CustomDataTree.ContextMenu = CustomDataTree.Resources["WeaponModelContext"] as System.Windows.Controls.ContextMenu;
-                    break;
-            }
-        }
-
-        /* When Menu Item NEW Project has been clicked */
+        /* Toolbar Menu - New Project Clicked */
         private void MenuItemNew_Click(object sender, RoutedEventArgs e)
         {
-            NewProject newProject = new NewProject();
+            DialogNewProject newProject = new DialogNewProject();
             newProject.Show();
             newProject.Activate();
         }
 
-        /* When a user wants to edit a project character */
+        /* Toolbar Menu - Save Project Clicked */
+        private void MenuItemSave_Click(object sender, RoutedEventArgs e)
+        {
+            ActiveProject.Save();
+        }
+
+        /* Toolbar Menu - Open Project Clicked */
+        private void MenuItemOpen_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog projectFinder = new OpenFileDialog();
+
+            projectFinder.Filter = "Workbench Project|*.mbwb|All files (*.*)|*.*";
+            projectFinder.FilterIndex = 1;
+            projectFinder.DefaultExt = "*.mbwb";
+            projectFinder.CheckFileExists = true;
+            projectFinder.Title = "Open Workbench Project";
+            projectFinder.InitialDirectory = Settings.UsersProjectHome;
+
+            if (projectFinder.ShowDialog() == true)
+            {
+                ActiveProject.Load(projectFinder.FileName);
+            }
+        }
+
+        /* Handles right or left clicking selects a Tree View Item */
+        private void TreeViewItem_SelectItemButtonDown(object sender, RoutedEventArgs e)
+        {
+
+            TreeViewItem treeViewItem = VisualUpwardSearch(e.OriginalSource as DependencyObject);
+
+            if (treeViewItem != null)
+            {
+                treeViewItem.Focus();
+                e.Handled = true;
+            }
+
+
+        }
+
+        /* Handles right or left clicking selects a Tree View Item */
+        static TreeViewItem VisualUpwardSearch(DependencyObject source)
+        {
+            while (source != null && !(source is TreeViewItem))
+                source = VisualTreeHelper.GetParent(source);
+
+            return source as TreeViewItem;
+        }
+
+        /* ---------------------------------------*/
+        /* TREEVIEW CONTEXT BAR ACTIONS */
+        /* ---------------------------------------*/
+
+        /* Context Menu - Project, Edit Character */
         private void EditProjectCharacter_Click(object sender, RoutedEventArgs e)
         {
 
-            TreeViewItem SelectedItem = ImportedDataTree.SelectedItem as TreeViewItem;
+            MenuItem selectedMenuItem = e.Source as MenuItem;
+            Character character = (Character)selectedMenuItem.DataContext;
 
-            /* Identify the character we want to edit our project */
-            Character character = ActiveProject.characters.Where(x => x.classinfo.name == SelectedItem.Header.ToString()).FirstOrDefault();
-
-
-            /* Send character to the editor */
-
-                            
+            DialogEditCharacter editCharacter = new DialogEditCharacter(character);
+            editCharacter.Show();
+            editCharacter.Activate();
         }
 
-
-        /* When a user wants to clone a character from imported data to their project */
-        private void AddImportedCharacterToProject_Click(object sender, RoutedEventArgs e)
+        /* Context Menu - Characters, Clone Character to Project */
+        private void CloneImportedCharacter_Click(object sender, RoutedEventArgs e)
         {
+            MenuItem selectedMenuItem = e.Source as MenuItem;
+            Character character = (Character)selectedMenuItem.DataContext;
 
-            TreeViewItem SelectedItem = ImportedDataTree.SelectedItem as TreeViewItem;
-
-            /* Identify the character we want to clone into our project */
-            Character character = ImportedData.importedCharacters.Where(x => x.classinfo.name == SelectedItem.Header.ToString()).FirstOrDefault();
-
-            /* Add to our project */
-            ActiveProject.characters.Add(character);
+            DialogCloneCharacter newProject = new DialogCloneCharacter(character);
+            newProject.Show();
+            newProject.Activate();
 
         }
-
-
-
-
-
-
-
-
-
         
     }
 

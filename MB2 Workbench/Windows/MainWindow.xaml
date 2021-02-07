@@ -86,8 +86,8 @@
                                     </TreeViewItem>
 
                                     <Controls:TreeViewItemTextBox 
-                                        ToolTip="Description is displayed to the player on the class selection screen. Name is infured from this." Title="Description" 
-                                        Folders="{Binding Path=description, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                        ToolTip="Description is displayed to the player on the class selection screen. Name is infured from this."
+                                        Value="{Binding Path=description, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
                                      />
 
                                 </TreeViewItem>

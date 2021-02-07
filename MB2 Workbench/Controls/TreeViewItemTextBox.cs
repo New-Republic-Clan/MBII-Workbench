@@ -11,71 +11,46 @@ namespace MB2_Workbench.Controls
     public class TreeViewItemTextBox : UserControl
     {
 
-        public static readonly DependencyProperty FoldersProperty = DependencyProperty.Register("Folders", typeof(string), typeof(TreeViewItemTextBox), new FrameworkPropertyMetadata(string.Empty, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnPropertyChanged));
 
-        private static void OnPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        public static DependencyProperty ValueProperty = DependencyProperty.Register("Value", typeof(string), typeof(TreeViewItemTextBox), new PropertyMetadata(null, Value_PropertyChanged));
+
+        public string Value
         {
-            var i = d.GetValue(FoldersProperty);
-            TreeViewItemTextBox c = (TreeViewItemTextBox)d;
-            c.ValueTextBox.Text = (string) i;
+            get { return (string)GetValue(ValueProperty); }
+            set { SetValue(ValueProperty, value); }
+        }
+
+        private static void Value_PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            TreeViewItemTextBox customTextBox = d as TreeViewItemTextBox;
+            customTextBox.ValueTextBox.Text = (string) e.NewValue; 
+        }
+
+        private void ValueTextBox_OnTextChanged(object sender, RoutedEventArgs e)
+        {
+
+            if((string) GetValue(TreeViewItemTextBox.ValueProperty) != ValueTextBox.Text )
+                SetValue(TreeViewItemTextBox.ValueProperty, ValueTextBox.Text);
+
 
         }
 
-        public string Folders
-        {
-            get { return GetValue(FoldersProperty) as string; }
-            set { SetValue(FoldersProperty, value); }
-        }
 
-        private TextBlock TitleTextBlock = new TextBlock();
-        private TextBox ValueTextBox = new TextBox();
-
-        public string Title
-        {
-            get { return (string) TitleTextBlock.Text; }
-            set { TitleTextBlock.Text = value; }
-        }
-
+        public TextBox ValueTextBox = new TextBox();
 
         public TreeViewItemTextBox()
         {
             InitializeComponent();
+            ValueTextBox.TextChanged += ValueTextBox_OnTextChanged;
         }
-
-        
 
         private void InitializeComponent()
         {
-
-            TreeViewItem parent = new TreeViewItem();
-
-            StackPanel stackPanel = new StackPanel();
-
-            stackPanel.Children.Add(TitleTextBlock);
-
-            stackPanel.Children.Add(new Button()
-            {
-                Content = "?",
-                ToolTip = this.ToolTip
-            });
-
-           
-            parent.Header = stackPanel;
-
-
-            /* Binding */
-           // BindingOperations.SetBinding(data, TextBox.TextProperty, new Binding(Dias));
-
-            TreeViewItem child = new TreeViewItem();
-
-            //ValueTextBox.Text = Value;
-
-            child.Header = ValueTextBox;
-
-            parent.Items.Add(child);
-
-            Content = parent;
-
+            Content = ValueTextBox;
         }
+
+
+
+
     }
 }
